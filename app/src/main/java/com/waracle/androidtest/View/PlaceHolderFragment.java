@@ -14,6 +14,7 @@ import android.view.ViewGroup;
 
 import com.waracle.androidtest.Constant;
 import com.waracle.androidtest.Model.BackgroundDataLoader;
+import com.waracle.androidtest.Model.BackgroundImageLoader;
 import com.waracle.androidtest.Presenter.CakeListPresenter;
 import com.waracle.androidtest.Presenter.CakeListView;
 import com.waracle.androidtest.R;
@@ -34,25 +35,30 @@ public class PlaceHolderFragment extends Fragment implements CakeListView {
     private JSONArray cakeData;
     private ProgressDialogLoader progressDialogLoader;
     private LoaderManager.LoaderCallbacks<JSONArray> jsonArrayLoaderCallbacks;
+    private LoaderManager.LoaderCallbacks<ArrayList<Bitmap>> imageLoaderCallbacks;
 
     @Nullable
     @Override
     public View onCreateView(LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState) {
         View view = inflater.inflate(R.layout.fragment_main, container, false);
         progressDialogLoader = (MainActivity) getActivity();
+        presenter = new CakeListPresenter(this);
         mRV = (RecyclerView) view.findViewById(R.id.recyclerView);
         mRV.setLayoutManager(new LinearLayoutManager(getActivity()));
-        initiateCallbacks();
+        adapter = new CakeAdapter(getActivity(), new JSONArray());
+        mRV.setAdapter(adapter);
+        initiateDataCallbacks();
+        initiateImageLoaderCallbacks();
         getActivity().getSupportLoaderManager().initLoader(Constant.DATA_LOADER_ID, null, jsonArrayLoaderCallbacks);
         return view;
     }
 
-    private void initiateCallbacks() {
+    private void initiateDataCallbacks() {
         jsonArrayLoaderCallbacks = new LoaderManager.LoaderCallbacks<JSONArray>() {
             @Override
             public Loader<JSONArray> onCreateLoader(int id, Bundle args) {
                 progressDialogLoader.loadProgressDialog();
-                BackgroundDataLoader dataLoader = new BackgroundDataLoader(getActivity(), Constant.URL);
+                BackgroundDataLoader dataLoader = new BackgroundDataLoader(getActivity().getApplicationContext(), Constant.URL);
                 return dataLoader;
             }
 
@@ -60,13 +66,37 @@ public class PlaceHolderFragment extends Fragment implements CakeListView {
             public void onLoadFinished(Loader<JSONArray> loader, JSONArray data) {
                 progressDialogLoader.stopProgressDialog();
                 cakeData = data;
-                adapter = new CakeAdapter(getActivity(), cakeData);
-                mRV.setAdapter(adapter);
+                adapter.setData(data);
+                adapter.notifyDataSetChanged();
+                getActivity().getSupportLoaderManager().initLoader(1, null, imageLoaderCallbacks);
+//                adapter = new CakeAdapter(getActivity(), cakeData);
+//                mRV.setAdapter(adapter);
             }
 
             @Override
             public void onLoaderReset(Loader<JSONArray> loader) {
-                loader.cancelLoad();
+                adapter.setData(null);
+            }
+        };
+    }
+
+    private void initiateImageLoaderCallbacks() {
+        imageLoaderCallbacks = new LoaderManager.LoaderCallbacks<ArrayList<Bitmap>>() {
+            @Override
+            public Loader<ArrayList<Bitmap>> onCreateLoader(int id, Bundle args) {
+                BackgroundImageLoader bImageLoader = new BackgroundImageLoader(getActivity().getApplicationContext(), cakeData);
+                return bImageLoader;
+            }
+
+            @Override
+            public void onLoadFinished(Loader<ArrayList<Bitmap>> loader, ArrayList<Bitmap> data) {
+                adapter.setBitmaps(data);
+                adapter.notifyDataSetChanged();
+            }
+
+            @Override
+            public void onLoaderReset(Loader<ArrayList<Bitmap>> loader) {
+                adapter.setBitmaps(null);
             }
         };
     }

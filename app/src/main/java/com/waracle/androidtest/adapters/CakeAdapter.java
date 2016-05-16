@@ -32,37 +32,12 @@ public class CakeAdapter extends RecyclerView.Adapter<CakeAdapter.ViewHolder> {
     public final String TAG = CakeAdapter.class.getSimpleName();
 
     private final Context context;
-    private final JSONArray jsonArray;
-    private ImageLoader imageLoader;
+    private JSONArray jsonArray;
     private ArrayList<Bitmap> cakeImageBitmaps;
-    private LoaderManager.LoaderCallbacks<ArrayList<Bitmap>> imageLoaderCallbacks;
 
     public CakeAdapter(Context context, JSONArray jsonArray) {
         this.context = context;
         this.jsonArray = jsonArray;
-        initiateImageLoaderCallbacks();
-        ((MainActivity) context).getSupportLoaderManager().initLoader(Constant.IMAGE_LOADER_ID, null, imageLoaderCallbacks);
-    }
-
-    private void initiateImageLoaderCallbacks() {
-        imageLoaderCallbacks = new LoaderManager.LoaderCallbacks<ArrayList<Bitmap>>() {
-            @Override
-            public Loader<ArrayList<Bitmap>> onCreateLoader(int id, Bundle args) {
-                BackgroundImageLoader bImageLoader = new BackgroundImageLoader(context, jsonArray);
-                return bImageLoader;
-            }
-
-            @Override
-            public void onLoadFinished(Loader<ArrayList<Bitmap>> loader, ArrayList<Bitmap> data) {
-                cakeImageBitmaps = data;
-                notifyDataSetChanged();
-            }
-
-            @Override
-            public void onLoaderReset(Loader<ArrayList<Bitmap>> loader) {
-
-            }
-        };
     }
 
     @Override
@@ -95,6 +70,10 @@ public class CakeAdapter extends RecyclerView.Adapter<CakeAdapter.ViewHolder> {
 
     public void setBitmaps(ArrayList<Bitmap> data) {
         this.cakeImageBitmaps = data;
+    }
+
+    public void setData(JSONArray data) {
+        this.jsonArray = data;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {

@@ -6,7 +6,6 @@ import android.support.v4.content.AsyncTaskLoader;
 import android.util.Log;
 
 import com.waracle.androidtest.Constant;
-import com.waracle.androidtest.Utils.StreamUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;
@@ -21,6 +20,7 @@ public class BackgroundImageLoader extends AsyncTaskLoader<ArrayList<Bitmap>> {
     private final String TAG = BackgroundImageLoader.class.getSimpleName();
 
     private final JSONArray jsonArray;
+    private ArrayList<Bitmap> bitmaps;
 
     public BackgroundImageLoader(Context context, JSONArray jsonArray) {
         super(context);
@@ -28,14 +28,23 @@ public class BackgroundImageLoader extends AsyncTaskLoader<ArrayList<Bitmap>> {
     }
 
     @Override
+    protected void onStartLoading() {
+        if (bitmaps == null)
+            forceLoad();
+        else
+            deliverResult(bitmaps);
+    }
+
+    @Override
     public ArrayList<Bitmap> loadInBackground() {
-        ArrayList<Bitmap> arrayList = null;
+        ArrayList<Bitmap> arrayList = new ArrayList<>();
         String imageURL = "";
         if (jsonArray != null) {
             for (int i = 0; i < jsonArray.length(); i++) {
                 try {
                     imageURL = jsonArray.getJSONObject(i).getString(Constant.JSON_CAKE_IMAGE);
                     Bitmap bitmap = ImageLoader.convertToBitmap(ImageLoader.loadImageData(imageURL));
+                    arrayList.add(bitmap);
                 } catch (JSONException e) {
                     Log.d(TAG, "loadInBackground: JSON Error");
                 } catch (IOException e) {
@@ -48,6 +57,7 @@ public class BackgroundImageLoader extends AsyncTaskLoader<ArrayList<Bitmap>> {
 
     @Override
     public void deliverResult(ArrayList<Bitmap> data) {
-        super.deliverResult(data);
+        bitmaps = data;
+        super.deliverResult(bitmaps);
     }
 }

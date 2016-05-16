@@ -18,6 +18,7 @@ import java.util.ArrayList;
  */
 public class BackgroundDataLoader extends AsyncTaskLoader<JSONArray> {
     private final String url;
+    private JSONArray jsonArray;
 
     public BackgroundDataLoader(Context context, String url) {
         super(context);
@@ -26,7 +27,10 @@ public class BackgroundDataLoader extends AsyncTaskLoader<JSONArray> {
 
     @Override
     protected void onStartLoading() {
-        super.onStartLoading();
+        if (jsonArray == null)
+            forceLoad();
+        else
+            deliverResult(jsonArray);
     }
 
     @Override
@@ -37,6 +41,8 @@ public class BackgroundDataLoader extends AsyncTaskLoader<JSONArray> {
 
     @Override
     public void deliverResult(JSONArray jsonArray) {
+        if (jsonArray != null)
+            this.jsonArray = jsonArray;
         super.deliverResult(jsonArray);
     }
 }
