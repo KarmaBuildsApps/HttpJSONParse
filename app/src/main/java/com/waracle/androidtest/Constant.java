@@ -13,4 +13,6 @@ public class Constant {
     public static final String JSON_CAKE_DESC = "desc";
     public static final String JSON_CAKE_IMAGE = "image";
 
+    public static int DATA_LOADER_ID = 0;
+    public static int IMAGE_LOADER_ID = 1;
 }

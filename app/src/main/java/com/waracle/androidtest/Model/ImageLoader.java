@@ -1,4 +1,4 @@
-package com.waracle.androidtest.Utils;
+package com.waracle.androidtest.Model;
 
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -8,6 +8,7 @@ import android.util.Log;
 import android.widget.ImageView;
 
 import com.waracle.androidtest.Constant;
+import com.waracle.androidtest.Utils.StreamUtils;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +41,7 @@ public class ImageLoader {
         new BackgroundImageLoader(imageView).execute(url);
     }
 
-    private static byte[] loadImageData(String url) throws IOException {
+    public static byte[] loadImageData(String url) throws IOException {
         HttpURLConnection connection = (HttpURLConnection) new URL(url).openConnection();
         connection.connect();
         int statusCode = connection.getResponseCode();
@@ -70,13 +71,13 @@ public class ImageLoader {
         return data;
     }
 
-    private Bitmap convertToBitmap(byte[] data) {
+    public static Bitmap convertToBitmap(byte[] data) {
         BitmapFactory.Options options = new BitmapFactory.Options();
 //        options.inMutable = false;
         return BitmapFactory.decodeByteArray(data, 0, data.length, options);
     }
 
-    private void setImageView(ImageView imageView, Bitmap bitmap) {
+    public static void setImageView(ImageView imageView, Bitmap bitmap) {
         imageView.setImageBitmap(bitmap);
     }
 

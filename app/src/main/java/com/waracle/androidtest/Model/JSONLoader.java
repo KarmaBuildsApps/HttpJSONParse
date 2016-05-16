@@ -1,6 +1,7 @@
-package com.waracle.androidtest.Utils;
+package com.waracle.androidtest.Model;
 
 import com.waracle.androidtest.Constant;
+import com.waracle.androidtest.Utils.StreamUtils;
 
 import org.json.JSONArray;
 import org.json.JSONException;

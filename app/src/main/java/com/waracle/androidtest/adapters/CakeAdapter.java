@@ -1,6 +1,10 @@
 package com.waracle.androidtest.adapters;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.os.Bundle;
+import android.support.v4.app.LoaderManager;
+import android.support.v4.content.Loader;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -10,12 +14,16 @@ import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.waracle.androidtest.Constant;
-import com.waracle.androidtest.Utils.ImageLoader;
+import com.waracle.androidtest.Model.BackgroundImageLoader;
+import com.waracle.androidtest.Model.ImageLoader;
 import com.waracle.androidtest.R;
+import com.waracle.androidtest.View.MainActivity;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.ArrayList;
 
 /**
  * Created by Karma on 12/05/16.
@@ -26,11 +34,35 @@ public class CakeAdapter extends RecyclerView.Adapter<CakeAdapter.ViewHolder> {
     private final Context context;
     private final JSONArray jsonArray;
     private ImageLoader imageLoader;
+    private ArrayList<Bitmap> cakeImageBitmaps;
+    private LoaderManager.LoaderCallbacks<ArrayList<Bitmap>> imageLoaderCallbacks;
 
     public CakeAdapter(Context context, JSONArray jsonArray) {
         this.context = context;
         this.jsonArray = jsonArray;
-        imageLoader = new ImageLoader();
+        initiateImageLoaderCallbacks();
+        ((MainActivity) context).getSupportLoaderManager().initLoader(Constant.IMAGE_LOADER_ID, null, imageLoaderCallbacks);
+    }
+
+    private void initiateImageLoaderCallbacks() {
+        imageLoaderCallbacks = new LoaderManager.LoaderCallbacks<ArrayList<Bitmap>>() {
+            @Override
+            public Loader<ArrayList<Bitmap>> onCreateLoader(int id, Bundle args) {
+                BackgroundImageLoader bImageLoader = new BackgroundImageLoader(context, jsonArray);
+                return bImageLoader;
+            }
+
+            @Override
+            public void onLoadFinished(Loader<ArrayList<Bitmap>> loader, ArrayList<Bitmap> data) {
+                cakeImageBitmaps = data;
+                notifyDataSetChanged();
+            }
+
+            @Override
+            public void onLoaderReset(Loader<ArrayList<Bitmap>> loader) {
+
+            }
+        };
     }
 
     @Override
@@ -48,7 +80,8 @@ public class CakeAdapter extends RecyclerView.Adapter<CakeAdapter.ViewHolder> {
             holder.desc.setText(jsonObject.getString(Constant.JSON_CAKE_DESC));
             url = jsonObject.getString(Constant.JSON_CAKE_IMAGE);
             Log.i(TAG, "onBindViewHolder: URL: " + url);
-            imageLoader.load(url, holder.listImage);
+            if (cakeImageBitmaps != null)
+                holder.listImage.setImageBitmap(cakeImageBitmaps.get(position));
         } catch (JSONException e) {
             Log.d(TAG, "onBindViewHolder: JSONObject read error");
         }
@@ -58,6 +91,10 @@ public class CakeAdapter extends RecyclerView.Adapter<CakeAdapter.ViewHolder> {
     @Override
     public int getItemCount() {
         return jsonArray.length();
+    }
+
+    public void setBitmaps(ArrayList<Bitmap> data) {
+        this.cakeImageBitmaps = data;
     }
 
     public class ViewHolder extends RecyclerView.ViewHolder {
